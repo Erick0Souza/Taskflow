@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Tarefas | TaskFlow{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Tarefas</h1>
+        <p class="muted">Busca e acompanhamento das tarefas.</p>
+    </div>
+</div>
+
+<form class="filters" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="Buscar tarefa">
+    <select name="status">
+        <option value="">Todos os status</option>
+        {% for value, label in statuses %}
+            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <select name="priority">
+        <option value="">Todas as prioridades</option>
+        {% for value, label in priorities %}
+            <option value="{{ value }}" {% if priority == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button class="button" type="submit">Filtrar</button>
+</form>
+
+<section class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Tarefa</th><th>Projeto</th><th>Prioridade</th><th>Status</th><th>Prazo</th></tr>
+            </thead>
+            <tbody>
+            {% for task in page %}
+                <tr>
+                    <td><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></td>
+                    <td>{{ task.project.name }}</td>
+                    <td>{{ task.get_priority_display }}</td>
+                    <td><span class="badge">{{ task.get_status_display }}</span></td>
+                    <td>{% if task.due_date %}{{ task.due_date|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5" class="empty">Nenhuma tarefa encontrada.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% include "partials/pagination.html" with page=page %}
+{% endblock %}

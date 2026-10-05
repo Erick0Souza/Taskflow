@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Projetos | TaskFlow{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Projetos</h1>
+        <p class="muted">Projetos aos quais você tem acesso.</p>
+    </div>
+    {% if user.is_admin or user.role == "manager" %}
+        <a class="button primary" href="{% url 'projects:create' %}">Novo projeto</a>
+    {% endif %}
+</div>
+
+<form class="filters" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Buscar projeto">
+    <button class="button" type="submit">Buscar</button>
+</form>
+
+<div class="grid">
+{% for project in page %}
+    <article class="card project-card">
+        <div class="card-row">
+            <h2><a href="{{ project.get_absolute_url }}">{{ project.name }}</a></h2>
+            {% if project.is_active %}
+                <span class="badge success">Ativo</span>
+            {% else %}
+                <span class="badge">Inativo</span>
+            {% endif %}
+        </div>
+        <p>{{ project.description|default:"Sem descrição."|truncatechars:130 }}</p>
+        <span class="small">Responsável: {{ project.owner.first_name|default:project.owner.username }}</span>
+    </article>
+{% empty %}
+    <p class="empty">Nenhum projeto encontrado.</p>
+{% endfor %}
+</div>
+
+{% include "partials/pagination.html" with page=page %}
+{% endblock %}

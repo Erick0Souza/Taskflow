@@ -1,0 +1,45 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}TaskFlow{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+<header class="topbar">
+    <div class="container topbar-inner">
+        <a class="brand" href="{% url 'dashboard:home' %}">TaskFlow</a>
+
+        {% if user.is_authenticated %}
+        <nav class="nav">
+            <a href="{% url 'dashboard:home' %}">Início</a>
+            <a href="{% url 'projects:list' %}">Projetos</a>
+            <a href="{% url 'tasks:my' %}">Minhas tarefas</a>
+            <a href="{% url 'tasks:list' %}">Todas</a>
+        </nav>
+
+        <div class="user-menu">
+            <span>{{ user.first_name|default:user.username }}</span>
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button class="link-button" type="submit">Sair</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</header>
+
+<main class="container page">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+</main>
+
+<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

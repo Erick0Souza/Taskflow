@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ project.name }} | TaskFlow{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <a class="back-link" href="{% url 'projects:list' %}">← Projetos</a>
+        <h1>{{ project.name }}</h1>
+        <p class="muted">{{ project.description|default:"Sem descrição." }}</p>
+    </div>
+    {% if project.can_manage %}
+    {% endif %}
+    {% if user.is_admin or project.owner_id == user.id %}
+        <a class="button" href="{% url 'projects:edit' project.id %}">Editar projeto</a>
+    {% endif %}
+</div>
+
+<div class="two-cols">
+    <section class="card">
+        <div class="section-title">
+            <h2>Tarefas</h2>
+            {% if user.is_admin or project.owner_id == user.id %}
+                <a class="button primary small-button" href="{% url 'tasks:create' project.id %}">Nova tarefa</a>
+            {% endif %}
+        </div>
+        {% if tasks %}
+            <div class="list">
+            {% for task in tasks %}
+                <a class="list-item" href="{{ task.get_absolute_url }}">
+                    <div>
+                        <strong>{{ task.title }}</strong>
+                        <span class="muted small">{{ task.get_priority_display }}</span>
+                    </div>
+                    <span class="badge">{{ task.get_status_display }}</span>
+                </a>
+            {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty">Nenhuma tarefa criada.</p>
+        {% endif %}
+    </section>
+
+    <aside class="card">
+        <h2>Equipe</h2>
+        <div class="list">
+        {% for membership in project.memberships.all %}
+            <div class="list-item">
+                <div>
+                    <strong>{{ membership.user.first_name|default:membership.user.username }}</strong>
+                    <span class="muted small">{{ membership.get_role_display }}</span>
+                </div>
+                {% if user.is_admin or project.owner_id == user.id %}
+                    {% if membership.user_id != project.owner_id %}
+                    <form method="post" action="{% url 'projects:member_remove' project.id membership.id %}">
+                        {% csrf_token %}
+                        <button class="link-danger" type="submit" data-confirm="Remover este membro do projeto?">Remover</button>
+                    </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% endfor %}
+        </div>
+
+        {% if user.is_admin or project.owner_id == user.id %}
+        <hr>
+        <form method="post" action="{% url 'projects:member_add' project.id %}" class="form-stack compact">
+            {% csrf_token %}
+            {{ membership_form.as_p }}
+            <button class="button" type="submit">Adicionar membro</button>
+        </form>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

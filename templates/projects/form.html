@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} | TaskFlow{% endblock %}
+{% block content %}
+<div class="narrow">
+    <a class="back-link" href="{% url 'projects:list' %}">← Voltar</a>
+    <section class="card">
+        <h1>{{ title }}</h1>
+        <form method="post" class="form-stack">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="button primary" type="submit">Salvar</button>
+        </form>
+    </section>
+</div>
+{% endblock %}

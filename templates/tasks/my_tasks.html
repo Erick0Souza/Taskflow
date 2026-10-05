@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Minhas tarefas | TaskFlow{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Minhas tarefas</h1>
+        <p class="muted">Tarefas atribuídas a você.</p>
+    </div>
+</div>
+
+<section class="card">
+{% if tasks %}
+    <div class="list">
+    {% for task in tasks %}
+        <a class="list-item" href="{{ task.get_absolute_url }}">
+            <div>
+                <strong>{{ task.title }}</strong>
+                <span class="muted small">{{ task.project.name }}</span>
+            </div>
+            <div class="inline-meta">
+                {% if task.is_overdue %}<span class="badge danger">Atrasada</span>{% endif %}
+                <span class="badge">{{ task.get_status_display }}</span>
+            </div>
+        </a>
+    {% endfor %}
+    </div>
+{% else %}
+    <p class="empty">Você não possui tarefas atribuídas.</p>
+{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ task.title }} | TaskFlow{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <a class="back-link" href="{{ task.project.get_absolute_url }}">← {{ task.project.name }}</a>
+        <h1>{{ task.title }}</h1>
+        <div class="inline-meta">
+            <span class="badge">{{ task.get_status_display }}</span>
+            <span class="badge">{{ task.get_priority_display }}</span>
+            {% if task.is_overdue %}<span class="badge danger">Atrasada</span>{% endif %}
+        </div>
+    </div>
+    {% if can_manage %}
+        <a class="button" href="{% url 'tasks:edit' task.id %}">Editar</a>
+    {% endif %}
+</div>
+
+<div class="two-cols">
+    <div>
+        <section class="card">
+            <h2>Descrição</h2>
+            <p class="preline">{{ task.description|default:"Sem descrição." }}</p>
+        </section>
+
+        <section class="card">
+            <h2>Comentários</h2>
+            {% for comment in comments %}
+                <div class="comment">
+                    <div class="comment-head">
+                        <strong>{{ comment.author.first_name|default:comment.author.username }}</strong>
+                        <span class="muted small">{{ comment.created_at|date:"d/m/Y H:i" }}</span>
+                    </div>
+                    <p>{{ comment.body }}</p>
+                </div>
+            {% empty %}
+                <p class="empty">Nenhum comentário.</p>
+            {% endfor %}
+
+            {% if task.status != "done" %}
+            <form method="post" action="{% url 'tasks:comment_add' task.id %}" class="form-stack compact">
+                {% csrf_token %}
+                {{ comment_form.as_p }}
+                <button class="button" type="submit">Comentar</button>
+            </form>
+            {% endif %}
+        </section>
+    </div>
+
+    <aside>
+        <section class="card">
+            <h2>Detalhes</h2>
+            <dl class="details">
+                <div><dt>Projeto</dt><dd>{{ task.project.name }}</dd></div>
+                <div><dt>Responsável</dt><dd>{{ task.assignee.first_name|default:task.assignee.username|default:"Não atribuído" }}</dd></div>
+                <div><dt>Prazo</dt><dd>{% if task.due_date %}{{ task.due_date|date:"d/m/Y" }}{% else %}—{% endif %}</dd></div>
+                <div><dt>Criada por</dt><dd>{{ task.created_by.first_name|default:task.created_by.username }}</dd></div>
+            </dl>
+
+            {% if can_change_status and task.allowed_transitions %}
+                <hr>
+                <form method="post" action="{% url 'tasks:status' task.id %}" class="form-stack compact">
+                    {% csrf_token %}
+                    <label>
+                        <span>Próximo status</span>
+                        <select name="status">
+                        {% for status in task.allowed_transitions %}
+                            {% if status == "in_progress" %}
+                                <option value="{{ status }}">Em andamento</option>
+                            {% elif status == "done" %}
+                                <option value="{{ status }}">Concluída</option>
+                            {% endif %}
+                        {% endfor %}
+                        </select>
+                    </label>
+                    <button class="button primary" type="submit">Atualizar status</button>
+                </form>
+            {% endif %}
+        </section>
+
+        <section class="card">
+            <h2>Histórico</h2>
+            {% for event in events %}
+                <div class="event">
+                    <span>{{ event.description }}</span>
+                    <small>{{ event.created_at|date:"d/m/Y H:i" }}</small>
+                </div>
+            {% empty %}
+                <p class="empty">Sem histórico.</p>
+            {% endfor %}
+        </section>
+    </aside>
+</div>
+{% endblock %}

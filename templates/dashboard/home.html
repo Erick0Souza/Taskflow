@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Início | TaskFlow{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Visão geral</h1>
+        <p class="muted">Resumo dos seus projetos e tarefas.</p>
+    </div>
+    {% if user.is_admin or user.role == "manager" %}
+        <a class="button primary" href="{% url 'projects:create' %}">Novo projeto</a>
+    {% endif %}
+</div>
+
+<div class="stats">
+    <div class="stat"><strong>{{ project_count }}</strong><span>Projetos</span></div>
+    <div class="stat"><strong>{{ summary.pending }}</strong><span>Pendentes</span></div>
+    <div class="stat"><strong>{{ summary.in_progress }}</strong><span>Em andamento</span></div>
+    <div class="stat"><strong>{{ summary.done }}</strong><span>Concluídas</span></div>
+    <div class="stat"><strong>{{ summary.overdue }}</strong><span>Atrasadas</span></div>
+</div>
+
+<section class="card">
+    <div class="section-title">
+        <h2>Atualizações recentes</h2>
+        <a href="{% url 'tasks:list' %}">Ver tarefas</a>
+    </div>
+    {% if recent_tasks %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Tarefa</th><th>Projeto</th><th>Status</th><th>Responsável</th></tr>
+                </thead>
+                <tbody>
+                {% for task in recent_tasks %}
+                    <tr>
+                        <td><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></td>
+                        <td>{{ task.project.name }}</td>
+                        <td><span class="badge">{{ task.get_status_display }}</span></td>
+                        <td>{{ task.assignee.first_name|default:task.assignee.username|default:"—" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="empty">Nenhuma tarefa encontrada.</p>
+    {% endif %}
+</section>
+{% endblock %}

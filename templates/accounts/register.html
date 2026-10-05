@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Cadastro | TaskFlow{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+    <section class="card auth-card">
+        <h1>Criar conta</h1>
+        <form method="post" class="form-stack">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% for field in form %}
+                <label>
+                    <span>{{ field.label }}</span>
+                    {{ field }}
+                    {{ field.errors }}
+                </label>
+            {% endfor %}
+            <button class="button primary" type="submit">Cadastrar</button>
+        </form>
+        <p class="small">Já possui conta? <a href="{% url 'accounts:login' %}">Entrar</a></p>
+    </section>
+</div>
+{% endblock %}
